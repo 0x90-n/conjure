@@ -11,6 +11,7 @@ import (
 	"encoding/binary"
 	"errors"
 	"fmt"
+	"math/big"
 	"sync"
 
 	zmq "github.com/pebbe/zmq4"
@@ -19,9 +20,11 @@ import (
 	"github.com/refraction-networking/conjure/pkg/metrics"
 	"github.com/refraction-networking/conjure/pkg/phantoms"
 	"github.com/refraction-networking/conjure/pkg/regserver/overrides"
+	"github.com/refraction-networking/conjure/pkg/transports/wrapping/prefix"
 	"github.com/refraction-networking/conjure/pkg/station/lib"
 	pb "github.com/refraction-networking/conjure/proto"
 	"google.golang.org/protobuf/proto"
+	"google.golang.org/protobuf/types/known/anypb"
 )
 
 var (
@@ -356,7 +359,166 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 		regResp.DstPort = proto.Uint32(443)
 	}
 
+	// Now ignore all overrides and begin the experimental overrides for Min and Prefix transports only
+
+	if transportType == pb.TransportType_Min {
+		// Override the Phantom IPv4 for clients with the Min transport in the following manner:
+		// 10% of the time to the first /26 of the Prestine_Subnet_A/24
+		// 10% of the time to the first /26 of the Prestine_Subnet_B/24
+
+		num, err := randomInt(0, 1000)
+		if err != nil {
+                        // In case of an error, return the original regResp and
+                        // do not proceed in this override
+	                return regResp, nil
+		}
+
+		if num < 100 {
+			ip, err := randomInt(2487025664, 2487025727) // Prestine.0.0/26
+			if err != nil {
+				// In case of an error, return the original regResp and
+				// do not proceed in this override
+				return regResp, nil
+			}
+			regResp.Ipv4Addr = proto.Uint32(ip)
+		} else if num >= 100 && num < 200 {
+			// TO BE DEBOOSTED
+			ip, err := randomInt(2487025920, 2487025983) // Prestine.1.0/26
+                        if err != nil {
+                                // In case of an error, return the original regResp and
+                                // do not proceed in this override
+                                return regResp, nil
+                        }
+                        regResp.Ipv4Addr = proto.Uint32(ip)
+		}
+		c2sPayload.RegistrationResponse = regResp
+
+	} else if transportType == pb.TransportType_Prefix {
+		// Override the Phantom IPv4 for clients with the Prefix transport
+		// and override the transport type only if c2s.GetDisableRegistrarOverrides() is false
+		if !c2s.GetDisableRegistrarOverrides() {
+			//newRegResp := &pb.RegistrationResponse{}
+			newRegResp := proto.Clone(regResp).(*pb.RegistrationResponse)
+
+			num, err := randomInt(0, 1000)
+			if err != nil {
+				// In case of an error, return the original regResp and 
+				// do not proceed in this override
+				return regResp, nil
+			}
+			if num % 2 == 0 {
+				// Override the prefix choice to TLSClientHello
+				// and override the Phantom IPv4 to the respective /26
+
+				err = overridePrefix(newRegResp, 4, 443)
+                                if err != nil {
+                                        return regResp, nil
+                                }
+				num, err = randomInt(0, 1000)
+				if err != nil {
+	                                // In case of an error, return the original regResp and
+					// do not proceed in this override
+					return regResp, nil
+				}
+				if num % 2 == 0 {
+					// Override the Phantom IPv4 to the second /26 of the Prestine_Subnet_A/24
+					ip, err := randomInt(2487025728, 2487025791) // Prestine.0.64/26
+		                        if err != nil {
+		                                // In case of an error, return the original regResp and
+		                                // do not proceed in this override
+		                                return regResp, nil
+		                        }
+		                        newRegResp.Ipv4Addr = proto.Uint32(ip)
+				} else {
+					// TO BE DEBOOSTED
+					// Override the Phantom IPv4 to the second /26 of the Prestine_Subnet_B/24
+					ip, err := randomInt(2487025984, 2487026047) // Prestine.1.64/26
+                                        if err != nil {
+                                                // In case of an error, return the original regResp and
+                                                // do not proceed in this override
+                                                return regResp, nil
+                                        }
+                                        newRegResp.Ipv4Addr = proto.Uint32(ip)
+				}
+			} else {
+				// Override the prefix choice to GetLong
+				// and override the Phantom IPv4 to the respective /26
+
+				err = overridePrefix(newRegResp, 1, 80)
+				if err != nil {
+					return regResp, nil
+				}
+
+				num, err = randomInt(0, 1000)
+                                if err != nil {
+                                        // In case of an error, return the original regResp and
+                                        // do not proceed in this override
+                                        return regResp, nil
+                                }
+                                if num % 2 == 0 {
+                                        // Override the Phantom IPv4 to the thrid /26 of the Prestine_Subnet_A/24
+					ip, err := randomInt(2487025792, 2487025855) // Prestine.0.128/26
+                                        if err != nil {
+                                                // In case of an error, return the original regResp and
+                                                // do not proceed in this override
+                                                return regResp, nil
+                                        }
+                                        newRegResp.Ipv4Addr = proto.Uint32(ip)
+                                } else {
+					// TO BE DEBOOSTED
+                                        // Override the Phantom IPv4 to the third /26 of the Prestine_Subnet_B/24
+					ip, err := randomInt(2487026048, 2487026111) // Prestine.1.128/26
+                                        if err != nil {
+                                                // In case of an error, return the original regResp and
+                                                // do not proceed in this override
+                                                return regResp, nil
+                                        }
+                                        newRegResp.Ipv4Addr = proto.Uint32(ip)
+                                }
+			}
+			regResp = newRegResp
+			c2sPayload.RegistrationResponse = regResp
+		}
+	}
 	return regResp, nil
+}
+
+// Helper function to get random integers within a range
+func randomInt(x, y uint32) (uint32, error) {
+
+	rangeSize := y - x + 1
+
+	// Generate a random number in the range [0, rangeSize)
+	randomNum, err := rand.Int(rand.Reader, big.NewInt(int64(rangeSize)))
+	if err != nil {
+		return 0, err
+	}
+
+	// Return the random number in the range [x, y]
+	return x + uint32(randomNum.Int64()), nil
+}
+
+// Helper function to override the prefix in the registration response
+func overridePrefix(newRegResp *pb.RegistrationResponse, prefixId prefix.PrefixID, dstPort uint32) (error) {
+
+	// Override Phantom dstPort
+	newRegResp.DstPort = proto.Uint32(dstPort)
+
+	// Override Prefix choice and PrefixParam
+	newPrefix, err := prefix.TryFromID(prefixId)
+	var fp = newPrefix.FlushPolicy()
+	var i int32 = int32(newPrefix.ID())
+	newparams := &pb.PrefixTransportParams{}
+	newparams.PrefixId = &i
+	newparams.CustomFlushPolicy = &fp
+	newparams.Prefix = newPrefix.Bytes()
+	anypbParams, err := anypb.New(newparams)
+	if err != nil {
+	        return err
+        }
+	newRegResp.TransportParams = anypbParams
+
+	return nil
 }
 
 // processC2SWrapper adds missing variables to the input c2s and returns the payload in format ready to be published to zmq
