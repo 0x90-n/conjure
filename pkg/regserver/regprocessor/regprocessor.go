@@ -410,7 +410,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 				// Override the prefix choice to TLSClientHello
 				// and override the Phantom IPv4 to the respective /26
 
-				err = overridePrefix(newRegResp, 4, 443)
+				err = overridePrefix(newRegResp, 10, 443)
                                 if err != nil {
                                         return regResp, nil
                                 }
