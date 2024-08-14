@@ -430,7 +430,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 		                        }
 		                        newRegResp.Ipv4Addr = proto.Uint32(ip)
 				} else {
-					err = overridePrefix(newRegResp, 12, 50542)
+					err = overridePrefix(newRegResp, 12, 80)
                                         if err != nil {
                                                 return regResp, nil
                                         }
