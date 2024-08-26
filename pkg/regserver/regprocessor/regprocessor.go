@@ -407,7 +407,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 				return regResp, nil
 			}
 			if num % 2 == 0 {
-				// Override the prefix choice to either NewTLSClientHello or SMSNGClientHello
+				// Override the prefix choice to either NewTLSClientHello or SMSNGClientHello2
 				// and override the Phantom IPv4 to the respective /26
 
 				num, err = randomInt(0, 1000)
@@ -417,12 +417,12 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 					return regResp, nil
 				}
 				if num % 2 == 0 {
-					err = overridePrefix(newRegResp, 10, 50541)
+					err = overridePrefix(newRegResp, 13, 50541)
 	                                if err != nil {
         	                                return regResp, nil
                 	                }
 					// Override the Phantom IPv4 to the second /26 of the Prestine_Subnet_C/24
-					ip, err := randomInt(2487026240, 2487026303) // Prestine.2.64/26
+					ip, err := randomInt(2487026304, 2487026367) // Prestine.2.128/26
 		                        if err != nil {
 		                                // In case of an error, return the original regResp and
 		                                // do not proceed in this override
@@ -430,12 +430,12 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 		                        }
 		                        newRegResp.Ipv4Addr = proto.Uint32(ip)
 				} else {
-					err = overridePrefix(newRegResp, 12, 80)
+					err = overridePrefix(newRegResp, 10, 80)
                                         if err != nil {
                                                 return regResp, nil
                                         }
 					// Override the Phantom IPv4 to the second /26 of the Prestine_Subnet_D/24
-					ip, err := randomInt(2487026496, 2487026559) // Prestine.3.64/26
+					ip, err := randomInt(2487026560, 2487026623) // Prestine.3.128/26
                                         if err != nil {
                                                 // In case of an error, return the original regResp and
                                                 // do not proceed in this override
