@@ -145,7 +145,7 @@ func (id PrefixID) Name() string {
 	case DNSOverUDP:
 		return "DNSOverUDP"
 	case ASCII:
-		retunr "ASCII"
+		return "ASCII"
 
 	// case GetShort:
 	// 	return "GetShort"
