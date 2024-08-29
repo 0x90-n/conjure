@@ -363,8 +363,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 
 	if transportType == pb.TransportType_Min {
 		// Override the Phantom IPv4 for clients with the Min transport in the following manner:
-		// 25% of the time to the first /26 of the Prestine_Subnet_C/24
-		// 25% of the time to the first /26 of the Prestine_Subnet_D/24
+		// Use 7 /30s from the second /26 of the Prestine_Subnet_E with different weights
 
 		num, err := randomInt(0, 1000)
 		if err != nil {
@@ -373,24 +372,70 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 	                return regResp, nil
 		}
 
-		if num < 250 {
-			ip, err := randomInt(2487026176, 2487026239) // Prestine.2.0/26
-			if err != nil {
-				// In case of an error, return the original regResp and
-				// do not proceed in this override
-				return regResp, nil
-			}
-			regResp.Ipv4Addr = proto.Uint32(ip)
-		} else if num >= 250 && num < 500 {
-			// TO BE DEBOOSTED
-			ip, err := randomInt(2487026432, 2487026495) // Prestine.3.0/26
+		if num <= 7 {
+			// This should be equivalent to chooing from a /26 (64 IPs) with a 10% probability
+			ip, err := randomInt(2487026752, 2487026755) // Prestine.4.64/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
                                 return regResp, nil
                         }
                         regResp.Ipv4Addr = proto.Uint32(ip)
-		}
+		} else if num > 7 && num <= 13 {
+                        ip, err := randomInt(2487026756, 2487026759) // Prestine.4.68/30
+                        if err != nil {
+                                // In case of an error, return the original regResp and
+                                // do not proceed in this override
+                                return regResp, nil
+                        }
+                        regResp.Ipv4Addr = proto.Uint32(ip)
+
+		} else if num > 13 && num <= 18 {
+                        ip, err := randomInt(2487026760, 2487026763) // Prestine.4.72/30
+                        if err != nil {
+                                // In case of an error, return the original regResp and
+                                // do not proceed in this override
+                                return regResp, nil
+                        }
+                        regResp.Ipv4Addr = proto.Uint32(ip)
+
+		} else if num > 18 && num <= 22 {
+                        ip, err := randomInt(2487026764, 2487026767) // Prestine.4.76/30
+                        if err != nil {
+                                // In case of an error, return the original regResp and
+                                // do not proceed in this override
+                                return regResp, nil
+                        }
+                        regResp.Ipv4Addr = proto.Uint32(ip)
+
+                } else if num > 22 && num <= 25 {
+                        ip, err := randomInt(2487026768, 2487026771) // Prestine.4.80/30
+                        if err != nil {
+                                // In case of an error, return the original regResp and
+                                // do not proceed in this override
+                                return regResp, nil
+                        }
+                        regResp.Ipv4Addr = proto.Uint32(ip)
+
+                } else if num > 25 && num <= 27 {
+                        ip, err := randomInt(2487026772, 2487026775) // Prestine.4.84/30
+                        if err != nil {
+                                // In case of an error, return the original regResp and
+                                // do not proceed in this override
+                                return regResp, nil
+                        }
+                        regResp.Ipv4Addr = proto.Uint32(ip)
+
+                } else if num > 27 && num <= 28 {
+                        ip, err := randomInt(2487026776, 2487026779) // Prestine.4.88/30
+                        if err != nil {
+                                // In case of an error, return the original regResp and
+                                // do not proceed in this override
+                                return regResp, nil
+                        }
+                        regResp.Ipv4Addr = proto.Uint32(ip)
+                }
+
 		c2sPayload.RegistrationResponse = regResp
 
 	} else if transportType == pb.TransportType_Prefix {
