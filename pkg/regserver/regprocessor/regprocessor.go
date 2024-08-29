@@ -407,7 +407,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 				return regResp, nil
 			}
 			if num % 2 == 0 {
-				// Override the prefix choice to either NewTLSClientHello or SMSNGClientHello2
+				// Override the prefix choice to either PostLong or SMSNGClientHello2
 				// and override the Phantom IPv4 to the respective /26
 
 				num, err = randomInt(0, 1000)
@@ -421,7 +421,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 	                                if err != nil {
         	                                return regResp, nil
                 	                }
-					// Override the Phantom IPv4 to the second /26 of the Prestine_Subnet_C/24
+					// Override the Phantom IPv4 to the third /26 of the Prestine_Subnet_C/24
 					ip, err := randomInt(2487026304, 2487026367) // Prestine.2.128/26
 		                        if err != nil {
 		                                // In case of an error, return the original regResp and
@@ -430,12 +430,12 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 		                        }
 		                        newRegResp.Ipv4Addr = proto.Uint32(ip)
 				} else {
-					err = overridePrefix(newRegResp, 10, 80)
+					err = overridePrefix(newRegResp, 2, 80)
                                         if err != nil {
                                                 return regResp, nil
                                         }
-					// Override the Phantom IPv4 to the second /26 of the Prestine_Subnet_D/24
-					ip, err := randomInt(2487026560, 2487026623) // Prestine.3.128/26
+					// Override the Phantom IPv4 to the fourth /26 of the Prestine_Subnet_D/24
+					ip, err := randomInt(2487026368, 2487026431) // Prestine.2.192/26
                                         if err != nil {
                                                 // In case of an error, return the original regResp and
                                                 // do not proceed in this override
@@ -444,13 +444,9 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                                         newRegResp.Ipv4Addr = proto.Uint32(ip)
 				}
 			} else {
-				// Override the prefix choice to GetLong
+				// Override the prefix choice to DNSOverUDP or OpenSSH2
 				// and override the Phantom IPv4 to the respective /26
 
-				err = overridePrefix(newRegResp, 1, 443)
-				if err != nil {
-					return regResp, nil
-				}
 
 				num, err = randomInt(0, 1000)
                                 if err != nil {
@@ -459,8 +455,12 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                                         return regResp, nil
                                 }
                                 if num % 2 == 0 {
-                                        // Override the Phantom IPv4 to the thrid /26 of the Prestine_Subnet_A/24
-					ip, err := randomInt(2487025792, 2487025855) // Prestine.0.128/26
+					err = overridePrefix(newRegResp, 14, 53)
+					if err != nil {
+						return regResp, nil
+					}
+                                        // Override the Phantom IPv4 to the fourth /26 of the Prestine_Subnet_D/24
+					ip, err := randomInt(2487026624, 2487026687) // Prestine.3.192/26
                                         if err != nil {
                                                 // In case of an error, return the original regResp and
                                                 // do not proceed in this override
@@ -468,9 +468,12 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                                         }
                                         newRegResp.Ipv4Addr = proto.Uint32(ip)
                                 } else {
-					// TO BE DEBOOSTED
-                                        // Override the Phantom IPv4 to the third /26 of the Prestine_Subnet_B/24
-					ip, err := randomInt(2487026048, 2487026111) // Prestine.1.128/26
+					err = overridePrefix(newRegResp, 9, 22)
+					if err != nil {
+						return regResp, nil
+					}
+                                        // Override the Phantom IPv4 to the first /26 of the Prestine_Subnet_E/24
+					ip, err := randomInt(2487026688, 2487026751) // Prestine.4.0/26
                                         if err != nil {
                                                 // In case of an error, return the original regResp and
                                                 // do not proceed in this override
