@@ -500,7 +500,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                                         return regResp, nil
                                 }
                                 if num % 2 == 0 {
-					err = overridePrefix(newRegResp, 14, 53)
+					err = overridePrefix(newRegResp, 14, 22)
 					if err != nil {
 						return regResp, nil
 					}
@@ -513,7 +513,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                                         }
                                         newRegResp.Ipv4Addr = proto.Uint32(ip)
                                 } else {
-					err = overridePrefix(newRegResp, 9, 22)
+					err = overridePrefix(newRegResp, 9, 53)
 					if err != nil {
 						return regResp, nil
 					}
