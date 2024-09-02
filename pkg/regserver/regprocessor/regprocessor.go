@@ -363,7 +363,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 
 	if transportType == pb.TransportType_Min {
 		// Override the Phantom IPv4 for clients with the Min transport in the following manner:
-		// Use 7 /30s from the second /26 of the Prestine_Subnet_E with different weights
+		// Use 7 /30s from the second /26 of the Prestine_Subnet_F with different weights
 
 		num, err := randomInt(0, 1000)
 		if err != nil {
@@ -374,7 +374,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
 
 		if num <= 7 {
 			// This should be equivalent to chooing from a /26 (64 IPs) with a 10% probability
-			ip, err := randomInt(2487026752, 2487026755) // Prestine.4.64/30
+			ip, err := randomInt(2756447232, 2756447235) // Prestine.12.0/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
@@ -382,7 +382,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                         }
                         regResp.Ipv4Addr = proto.Uint32(ip)
 		} else if num > 7 && num <= 13 {
-                        ip, err := randomInt(2487026756, 2487026759) // Prestine.4.68/30
+                        ip, err := randomInt(2756447236, 2756447239) // Prestine.12.4/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
@@ -391,7 +391,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                         regResp.Ipv4Addr = proto.Uint32(ip)
 
 		} else if num > 13 && num <= 18 {
-                        ip, err := randomInt(2487026760, 2487026763) // Prestine.4.72/30
+                        ip, err := randomInt(2756447240, 2756447243) // Prestine.12.8/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
@@ -400,7 +400,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                         regResp.Ipv4Addr = proto.Uint32(ip)
 
 		} else if num > 18 && num <= 22 {
-                        ip, err := randomInt(2487026764, 2487026767) // Prestine.4.76/30
+                        ip, err := randomInt(2756447244, 2756447247) // Prestine.12.12/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
@@ -409,7 +409,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                         regResp.Ipv4Addr = proto.Uint32(ip)
 
                 } else if num > 22 && num <= 25 {
-                        ip, err := randomInt(2487026768, 2487026771) // Prestine.4.80/30
+                        ip, err := randomInt(2756447248, 2756447251) // Prestine.12.16/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
@@ -418,7 +418,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                         regResp.Ipv4Addr = proto.Uint32(ip)
 
                 } else if num > 25 && num <= 27 {
-                        ip, err := randomInt(2487026772, 2487026775) // Prestine.4.84/30
+                        ip, err := randomInt(2756447252, 2756447255) // Prestine.12.20/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
@@ -427,7 +427,7 @@ func (p *RegProcessor) processBdReq(c2sPayload *pb.C2SWrapper) (*pb.Registration
                         regResp.Ipv4Addr = proto.Uint32(ip)
 
                 } else if num > 27 && num <= 28 {
-                        ip, err := randomInt(2487026776, 2487026779) // Prestine.4.88/30
+                        ip, err := randomInt(2756447256, 2756447259) // Prestine.12.24/30
                         if err != nil {
                                 // In case of an error, return the original regResp and
                                 // do not proceed in this override
